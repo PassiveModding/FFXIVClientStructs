@@ -19,28 +19,29 @@ public unsafe partial struct CharacterBase {
     public const int PathBufferSize = 260;
 
     [FieldOffset(0x0)] public DrawObject DrawObject;
-    [FieldOffset(0x90)] public byte UnkFlags_01;
-    [FieldOffset(0x91)] public byte UnkFlags_02;
-    [FieldOffset(0x92)] public byte UnkFlags_03;
+    [FieldOffset(0x90)] public ModelFlags1 UnkFlags_01;
+    [FieldOffset(0x91)] public ModelFlags2 UnkFlags_02;
+    [FieldOffset(0x92)] public ModelFlags3 UnkFlags_03;
     [FieldOffset(0x98)] public int SlotCount; // model slots
     [FieldOffset(0xA0)] public Skeleton* Skeleton; // Client::Graphics::Render::Skeleton
 
     [FieldOffset(0xA8)] public Model** Models; // size = SlotCount
     [FieldOffset(0x148)] public void* PostBoneDeformer; // Client::Graphics::Scene::PostBoneDeformer ptr
 
-    public bool IsChangingVisor {
-        get => (UnkFlags_01 & 0x80) == 0x80;
-        set => UnkFlags_01 = (byte)(value ? UnkFlags_01 | 0x80 : UnkFlags_01 & ~0x80);
+    [Flags]
+    public enum ModelFlags1 {
+        VisorToggled = 0x40,
+        IsChangingVisor = 0x80
     }
 
-    public bool VisorToggled {
-        get => (UnkFlags_01 & 0x40) == 0x40;
-        set => UnkFlags_01 = (byte)(value ? UnkFlags_01 | 0x40 : UnkFlags_01 & ~0x40);
+    [Flags]
+    public enum ModelFlags2 {
+
     }
 
-    public bool HasUmbrella {
-        get => (UnkFlags_03 & 0x01) == 0x01;
-        set => UnkFlags_03 = (byte)(value ? UnkFlags_03 | 0x01 : UnkFlags_03 & ~0x01);
+    [Flags]
+    public enum ModelFlags3 {
+        HasUmbrella = 0x01
     }
 
 
