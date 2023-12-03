@@ -27,4 +27,8 @@ public unsafe struct hkArray<T> where T : unmanaged {
         get => Data[index];
         set => Data[index] = value;
     }
+
+    public readonly Span<T> AsSpan() {
+        return new(Data, Length);
+    }
 }

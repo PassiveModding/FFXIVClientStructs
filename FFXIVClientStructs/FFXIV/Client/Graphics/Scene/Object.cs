@@ -1,4 +1,5 @@
 using FFXIVClientStructs.FFXIV.Common.Math;
+using FFXIVClientStructs.Havok;
 
 namespace FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
@@ -15,6 +16,7 @@ public unsafe partial struct Object {
     public readonly SiblingEnumerator ChildObjects
         => new(ChildObject);
 
+    [FieldOffset(0x50)] public hkQsTransformf Transform;
     [FieldOffset(0x50)] public Vector3 Position;
     [FieldOffset(0x60)] public Quaternion Rotation;
     [FieldOffset(0x70)] public Vector3 Scale;

@@ -106,6 +106,7 @@ public unsafe partial struct DrawObjectData {
     public const int Size = 0x70;
 
     [FieldOffset(0x00)] public WeaponModelId ModelId;
+    [FieldOffset(0x08)] public Weapon* Model;
     [FieldOffset(0x10)] public void** VTable;
     [FieldOffset(0x18)] public DrawObject* DrawObject;
     [FieldOffset(0x60)] public byte State;
@@ -135,8 +136,6 @@ public unsafe partial struct CustomizeData {
     [MemberFunction("E8 ?? ?? ?? ?? 33 DB 48 8D 75")]
     public partial bool NormalizeCustomizeData(CustomizeData* source);
 }
-
-
 
 [StructLayout(LayoutKind.Explicit, Size = 8)]
 public struct WeaponModelId {

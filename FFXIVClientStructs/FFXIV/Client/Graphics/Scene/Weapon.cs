@@ -16,6 +16,7 @@ public unsafe struct Weapon {
     [FieldOffset(0x8F2)] public ushort SecondaryId;
     [FieldOffset(0x8F4)] public ushort Variant;
     [FieldOffset(0x8F6)] public ushort ModelUnknown;
+    [FieldOffset(0x8F8)] public ushort Unk1;
     [FieldOffset(0x8FA)] public byte MaterialId;
     [FieldOffset(0x8FB)] public byte DecalId;
     [FieldOffset(0x8FE)] public byte VfxId;

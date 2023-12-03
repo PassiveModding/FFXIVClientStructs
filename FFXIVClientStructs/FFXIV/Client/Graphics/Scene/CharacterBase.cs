@@ -26,6 +26,9 @@ public unsafe partial struct CharacterBase {
     [FieldOffset(0xA0)] public Skeleton* Skeleton; // Client::Graphics::Render::Skeleton
 
     [FieldOffset(0xA8)] public Model** Models; // size = SlotCount
+
+    [FieldOffset(0xD0)] public Attach Attach;
+
     [FieldOffset(0x148)] public void* PostBoneDeformer; // Client::Graphics::Scene::PostBoneDeformer ptr
 
     [Flags]
@@ -58,6 +61,9 @@ public unsafe partial struct CharacterBase {
     [FieldOffset(0x258)] public Texture** ColorTableTextures; // each one corresponds to a material, size = SlotCount * 4
 
     [FieldOffset(0x260)] public Vector3 Tint; // TODO: Should be a Vector4 with next API bump - color tint for the chara base
+
+    [FieldOffset(0x270)] public float Scale;
+    [FieldOffset(0x274)] public float Height;
 
     [FieldOffset(0x2B0)] public float WeatherWetness;  // Set to 1.0f when raining and not covered or umbrella'd
     [FieldOffset(0x2B4)] public float SwimmingWetness; // Set to 1.0f when in water
