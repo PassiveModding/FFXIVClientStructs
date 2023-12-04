@@ -22,7 +22,7 @@ public unsafe struct Model {
     [FieldOffset(0xA0)] public int MaterialCount;
 
     [FieldOffset(0xA4)] public uint DisabledEyeAttributeIndexMask; // Unknown
-    [FieldOffset(0xAC)] public uint DisabledAttributeIndexMask;
+    [FieldOffset(0xAC)] public uint EnabledAttributeIndexMask;
     [FieldOffset(0xC8)] public uint EnabledShapeKeyIndexMask;
 
     [FieldOffset(0xE8)] public uint SlotIndex;

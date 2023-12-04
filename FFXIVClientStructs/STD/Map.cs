@@ -1,9 +1,10 @@
+using System.Collections;
 using System.Diagnostics;
 
 namespace FFXIVClientStructs.STD;
 
 [StructLayout(LayoutKind.Sequential, Size = 0x10)]
-public unsafe struct StdMap<TKey, TValue>
+public unsafe struct StdMap<TKey, TValue> : IEnumerable<StdPair<TKey, TValue>>
     where TKey : unmanaged
     where TValue : unmanaged {
     public Node* Head;
@@ -17,7 +18,15 @@ public unsafe struct StdMap<TKey, TValue>
 
     public Enumerator GetEnumerator() => new(this);
 
-    public ref struct Enumerator {
+    IEnumerator<StdPair<TKey, TValue>> IEnumerable<StdPair<TKey, TValue>>.GetEnumerator() {
+        return GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() {
+        return GetEnumerator();
+    }
+
+    public struct Enumerator : IEnumerator<StdPair<TKey, TValue>> {
         private readonly Node* _head;
         private Node* _current;
 
@@ -32,7 +41,19 @@ public unsafe struct StdMap<TKey, TValue>
             return _current != null;
         }
 
+        public void Reset() {
+            _current = _head;
+        }
+
+        public void Dispose() {
+            
+        }
+
         public ref readonly StdPair<TKey, TValue> Current => ref _current->KeyValuePair;
+
+        StdPair<TKey, TValue> IEnumerator<StdPair<TKey, TValue>>.Current => Current;
+
+        object IEnumerator.Current => Current;
     }
 
     [StructLayout(LayoutKind.Sequential)]
