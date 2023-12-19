@@ -1,3 +1,4 @@
+using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 
 namespace FFXIVClientStructs.FFXIV.Client.Graphics.Render;
@@ -17,6 +18,8 @@ public unsafe struct Model {
 
     [FieldOffset(0x58)] public void** BoneList;
     [FieldOffset(0x60)] public int BoneCount;
+
+    [FieldOffset(0x70)] public IndexBuffer* IndexBuffer;
 
     [FieldOffset(0x98)] public Material** Materials;
     [FieldOffset(0xA0)] public int MaterialCount;

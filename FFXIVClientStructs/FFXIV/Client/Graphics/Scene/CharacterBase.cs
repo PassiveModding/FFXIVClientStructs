@@ -85,6 +85,10 @@ public unsafe partial struct CharacterBase {
 
     [FieldOffset(0x2F8)] public void** IMCArray; // array of Client::System::Resource::Handle::ImageChangeDataResourceHandle ptrs size = SlotCount - IMC file for model in slot
 
+    [FieldOffset(0x300)] public StdVector<nint> UnkVector;
+
+    [FieldOffset(0x318)] public StdVector<Pointer<ResourceHandle>> ResourceHandles;
+
     [FieldOffset(0x8E8)] public byte AnimationVariant; // the "a%04d" part in "%s/animation/a%04d/%s/%s.pap"
 
     public readonly Span<Pointer<Model>> ModelsSpan
