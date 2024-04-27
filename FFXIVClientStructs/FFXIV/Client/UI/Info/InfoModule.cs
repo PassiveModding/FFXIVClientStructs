@@ -14,11 +14,12 @@ public unsafe partial struct InfoModule {
     [FieldOffset(0x1BC8)] public Utf8String UnkString3;
     [FieldOffset(0x1C30)] public ulong OnlineStatusFlags;
 
-    public InfoProxyInterface* GetInfoProxyById(InfoProxyId id)
-        => GetInfoProxyById((uint)id);
-
     [MemberFunction("E8 ?? ?? ?? ?? 48 8B 55 68")]
-    public partial InfoProxyInterface* GetInfoProxyById(uint id);
+    public partial InfoProxyInterface* GetInfoProxyById(InfoProxyId id);
+
+    [Obsolete("Use GetInfoProxyById(InfoProxyId)")]
+    public InfoProxyInterface* GetInfoProxyById(uint id)
+        => GetInfoProxyById((InfoProxyId)id);
 
     /// <summary>
     /// Checks if the local player has a specific online status set.
@@ -35,11 +36,7 @@ public unsafe partial struct InfoModule {
 }
 
 public enum InfoProxyId : uint {
-    //ShellCommandChatLinkShell refers to 3,18
-    //Party Decline, PartyInv,PartyJoin  refer to 2
     //ShellCommandDice refers to  3, 13(Fc), 18 ,24
-    //AgentChatLogvf9 refers to 18
-    //15 and 16 are the same class
     Party = 0,
     Party2 = 1,
     PartyInvite = 2,
