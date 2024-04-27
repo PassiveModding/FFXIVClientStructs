@@ -190,7 +190,7 @@ public unsafe partial struct ModelResourceHandle {
         public byte BGChangeMaterialIndex;
         public byte BGCrestChangeMaterialIndex;
         public byte Unknown6;
-        public ushort Unknown7;
+        public ushort BoneTableArrayCountTotal;
         public ushort Unknown8;
         public ushort Unknown9;
     }
