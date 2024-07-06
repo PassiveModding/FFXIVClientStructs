@@ -1,6 +1,7 @@
 using System.Text;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Render;
+using FFXIVClientStructs.FFXIV.Common.Math;
 
 namespace FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 
@@ -12,7 +13,7 @@ namespace FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 [Inherits<ResourceHandle>]
 [StructLayout(LayoutKind.Explicit, Size = 0x108)]
 public unsafe partial struct MaterialResourceHandle {
-    public const int TableRows = 16;
+    public const int TableRows = 32;
 
     [StructLayout(LayoutKind.Explicit, Size = 0x10)]
     public struct TextureEntry {
@@ -78,17 +79,30 @@ public unsafe partial struct MaterialResourceHandle {
             get => (ushort)((float)TileIndexW * 64.0f);
             set => TileIndexW = (Half)((value + 0.5f) / 64.0f);
         }
-
-        public Span<Half> AsSpan() {
-            fixed (Half* ptr = &DiffuseRed) {
-                return new(ptr, 16);
-            }
+        
+        public Vector3 Diffuse {
+            get => new((float)DiffuseRed, (float)DiffuseGreen, (float)DiffuseBlue);
+            set => (DiffuseRed, DiffuseGreen, DiffuseBlue) = ((Half)value.X, (Half)value.Y, (Half)value.Z);
         }
-
-        public ReadOnlySpan<Half> AsReadOnlySpan() {
-            fixed (Half* ptr = &DiffuseRed) {
-                return new(ptr, 16);
-            }
+        
+        public Vector3 Specular {
+            get => new((float)SpecularRed, (float)SpecularGreen, (float)SpecularBlue);
+            set => (SpecularRed, SpecularGreen, SpecularBlue) = ((Half)value.X, (Half)value.Y, (Half)value.Z);
+        }
+        
+        public Vector3 Emissive {
+            get => new((float)EmissiveRed, (float)EmissiveGreen, (float)EmissiveBlue);
+            set => (EmissiveRed, EmissiveGreen, EmissiveBlue) = ((Half)value.X, (Half)value.Y, (Half)value.Z);
+        }
+        
+        public Vector2 TileScaleU {
+            get => new((float)TileScaleUU, (float)TileScaleUV);
+            set => (TileScaleUU, TileScaleUV) = ((Half)value.X, (Half)value.Y);
+        }
+        
+        public Vector2 TileScaleV {
+            get => new((float)TileScaleVU, (float)TileScaleVV);
+            set => (TileScaleVU, TileScaleVV) = ((Half)value.X, (Half)value.Y);
         }
     }
 
