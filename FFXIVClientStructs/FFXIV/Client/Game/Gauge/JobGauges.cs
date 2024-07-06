@@ -200,17 +200,20 @@ public struct ViperGauge {
 
 #region Tanks
 
-[StructLayout(LayoutKind.Explicit, Size = 0x10)]
+[StructLayout(LayoutKind.Explicit, Size = 0x18)]
 public struct DarkKnightGauge {
     [FieldOffset(0x08)] public byte Blood;
+    [FieldOffset(0x09)] public byte DarkArtsState;
     [FieldOffset(0x0A)] public ushort DarksideTimer;
-    [FieldOffset(0x0C)] public byte DarkArtsState;
-    [FieldOffset(0x0E)] public ushort ShadowTimer;
+    [FieldOffset(0x0C)] public ushort ShadowTimer;
+    [FieldOffset(0x10)] public ushort DeliriumStep;
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 0x10)]
 public struct PaladinGauge {
     [FieldOffset(0x08)] public byte OathGauge;
+    [FieldOffset(0x0A)] public ushort ConfiteorComboTimer; //that only updates when you generate/spend oath
+    [FieldOffset(0x0C)] public ushort ConfiteorComboStep;
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 0x10)]
