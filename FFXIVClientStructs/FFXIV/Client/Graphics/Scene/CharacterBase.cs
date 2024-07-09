@@ -19,6 +19,7 @@ namespace FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 [StructLayout(LayoutKind.Explicit, Size = 0x9D0)]
 public unsafe partial struct CharacterBase {
     public const int PathBufferSize = 260;
+    public const int MaxMaterialCount = 10;
 
     [FieldOffset(0x90)] public byte UnkFlags_01;
     [FieldOffset(0x91)] public byte UnkFlags_02;
@@ -58,10 +59,11 @@ public unsafe partial struct CharacterBase {
     [FieldOffset(0x224)] public float VfxScale;
     [FieldOffset(0x240)] public ConstantBuffer* CharacterDataCBuffer; // Size has been observed to be 0x50, contents may be InstanceParameter
 
-    [FieldOffset(0x258)] public Texture** ColorTableTextures; // each one corresponds to a material, size = SlotCount * 4
 
     [FieldOffset(0x260)] public Vector4 Tint;
 
+    [FieldOffset(0x288)] public Texture** ColorTableTextures; // each one corresponds to a material, size = SlotCount * MaxMaterialCount
+    
     [FieldOffset(0x2B0)] public float WeatherWetness;  // Set to 1.0f when raining and not covered or umbrella'd
     [FieldOffset(0x2B4)] public float SwimmingWetness; // Set to 1.0f when in water
     [FieldOffset(0x2B8)] public float WetnessDepth;    // Set to ~character height in GPose and higher values when swimming or diving.
@@ -76,7 +78,7 @@ public unsafe partial struct CharacterBase {
 
     [FieldOffset(0x2D8)] public void* TempSlotData; // struct with temporary data for each slot (size = 0x88 * slot count)
 
-    [FieldOffset(0x2E8)] public Material** Materials; // size = SlotCount * 4 (4 material per model max)
+    [FieldOffset(0x2E8)] public Material** Materials; // size = SlotCount * MaxMaterialCount
 
     [FieldOffset(0x2F0)] public void* EID; // Client::System::Resource::Handle::ElementIdResourceHandle - EID file for base skeleton
 
@@ -85,8 +87,8 @@ public unsafe partial struct CharacterBase {
     [FieldOffset(0x8E8)] public byte AnimationVariant; // the "a%04d" part in "%s/animation/a%04d/%s/%s.pap"
 
     public Span<Pointer<Model>> ModelsSpan => new(Models, SlotCount);
-    public Span<Pointer<Texture>> ColorTableTexturesSpan => new(ColorTableTextures, SlotCount * 4);
-    public Span<Pointer<Material>> MaterialsSpan => new(Materials, SlotCount * 4);
+    public Span<Pointer<Texture>> ColorTableTexturesSpan => new(ColorTableTextures, SlotCount * MaxMaterialCount);
+    public Span<Pointer<Material>> MaterialsSpan => new(Materials, SlotCount * MaxMaterialCount);
 
     [MemberFunction("E8 ?? ?? ?? ?? 48 8B 4E 08 48 8B D0 4C 8B 01")]
     public static partial CharacterBase* Create(uint modelId, CustomizeData* customize, EquipmentModelId* equipData /* 10 times, 40 byte */, byte unk);
