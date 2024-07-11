@@ -158,10 +158,24 @@ class BaseApi:
         """
 
     @abstractmethod
+    def update_virt_func(self, virt_func, struct):
+        # type: (DefinedVFunc, DefinedStruct) -> None
+        """
+        Updates a virtual function in the database.
+        """
+
+    @abstractmethod
     def should_update_member_func(self):
         # type: () -> bool
         """
         Returns if the member function types should be updated.
+        """
+
+    @abstractmethod
+    def should_update_virt_func(self):
+        # type: () -> bool
+        """
+        Returns if the virtual function types should be updated.
         """
 
     @property
@@ -409,11 +423,12 @@ if api is None:
                 self.get_named_type(type_tinfo, type)
 
                 if ptr_count > 0:
-                    ptr_tinfo = idaapi.tinfo_t()
                     for i in range(ptr_count):
+                        ptr_tinfo = idaapi.tinfo_t()
                         if not ptr_tinfo.create_ptr(type_tinfo):
                             print("! failed to create pointer")
                             return None
+                        type_tinfo = ptr_tinfo
                 else:
                     ptr_tinfo = type_tinfo
 
@@ -856,13 +871,47 @@ if api is None:
                     arg.name = param.name
                     func_data.push_back(arg)
                 tif.create_func(func_data)
-                print("updating {0} with {1}".format(func_name, tif))
+                ida_typeinf.apply_tinfo(ea, tif, ida_typeinf.TINFO_DEFINITE)
+
+            def update_virt_func(self, virt_func, struct) -> None:
+                # type: (DefinedVFunc, DefinedStruct) -> None
+                func_name = "{0}.{1}".format(
+                    self.clean_name(struct.type), virt_func.name
+                )
+                ea = self.get_func_ea_by_name(func_name)
+                if ea == idc.BADADDR:
+                    print("Error: {0} not found using base?".format(func_name))
+                    return
+                tif = ida_typeinf.tinfo_t()
+                ida_typeinf.guess_tinfo(tif, ea)
+                func_data = ida_typeinf.func_type_data_t()
+                tif.get_func_details(func_data)
+                func_data.clear()
+                func_data.cc = ida_typeinf.CM_CC_FASTCALL
+                if virt_func.return_type != "void":
+                    func_data.rettype = self.get_tinfo_from_type(virt_func.return_type)
+                else:
+                    func_data.rettype = self.get_void_tinfo()
+                for param in virt_func.parameters:
+                    arg = ida_typeinf.funcarg_t()
+                    arg.type = self.get_tinfo_from_type(param.type)
+                    arg.name = param.name
+                    func_data.push_back(arg)
+                tif.create_func(func_data)
                 ida_typeinf.apply_tinfo(ea, tif, ida_typeinf.TINFO_DEFINITE)
 
             def should_update_member_func(self):
                 return (
                     ida_kernwin.ask_yn(
                         ida_kernwin.ASKBTN_YES, "Update member function types?"
+                    )
+                    == ida_kernwin.ASKBTN_YES
+                )
+
+            def should_update_virt_func(self):
+                return (
+                    ida_kernwin.ask_yn(
+                        ida_kernwin.ASKBTN_YES, "Update virtual function types?"
                     )
                     == ida_kernwin.ASKBTN_YES
                 )
@@ -1208,15 +1257,256 @@ if api is None:
                     SourceType.USER_DEFINED,
                 )
 
+            def update_virt_func(self, virt_func, struct):
+                # type: (DefinedVFunc, DefinedStruct) -> None
+                if monitor.isCancelled():
+                    return
+                func_name = "{0}.{1}".format(struct.type, virt_func.name)
+                func = self.get_func_by_name(func_name)
+                if not func:
+                    return
+                arg_vars = self.create_memberfunc_args(virt_func)
+                return_type = self.get_datatype(virt_func.return_type)
+                if not return_type:
+                    return
+                return_var = ReturnParameterImpl(return_type, currentProgram)
+                update_type = Function.FunctionUpdateType.DYNAMIC_STORAGE_ALL_PARAMS
+                func.updateFunction(
+                    "__fastcall",
+                    return_var,
+                    arg_vars,
+                    update_type,
+                    False,
+                    SourceType.USER_DEFINED,
+                )
+
             def should_update_member_func(self):
                 # type: () -> bool
                 return askYesNo("ffxiv_structimporter", "Update member function types?")
 
+            def should_update_virt_func(self):
+                # type: () -> bool
+                return askYesNo(
+                    "ffxiv_structimporter", "Update virtual function types?"
+                )
+
         api = GhidraApi()
+
+if api is None:
+    try:
+        import binaryninja
+        import struct
+    except ImportError:
+        print("Warning: Unable to load Binary Ninja")
+    else:
+        # TODO: VTables, Unions
+        class BinjaApi(BaseApi):
+            def get_binja_type(self, name):
+                # type: (str) -> str
+                lookup = {
+                    "__int8": "int8_t",
+                    "__int16": "int16_t",
+                    "__int32": "int32_t",
+                    "__int64": "int64_t",
+                    "unsigned __int8": "uint8_t",
+                    "unsigned __int16": "uint16_t",
+                    "unsigned __int32": "uint32_t",
+                    "unsigned __int64": "uint64_t",
+                    "unsigned int": "uint32_t",
+                    "_DWORD": "uint32_t",
+                    "float": "float",
+                }
+                if name in lookup:
+                    return lookup[name]
+                else:
+                    return name
+
+            def get_type(self, name):
+                # type: (str) -> binaryninja.Type
+                if name == "__fastcall":
+                    return None
+
+                fixed_name = self.get_binja_type(name)
+
+                pointer_count = 0
+                while fixed_name.endswith("*"):
+                    fixed_name = fixed_name[:-1]
+                    pointer_count += 1
+
+                type = None
+
+                try:
+                    type = bv.parse_type_string(fixed_name)[0]
+                except:
+                    # Sometimes it just throws. Dunno why
+                    type = bv.types[fixed_name]
+
+                if pointer_count > 0:
+                    type = binaryninja.Type.pointer(type=type, arch=bv.arch)
+
+                return type
+
+            def get_size_from_type(self, name):
+                # type: (str) -> int
+                type_obj = self.get_type(name)
+                if type_obj is None:
+                    return 4
+                return type_obj.width
+
+            @property
+            def get_file_path(self):
+                # type: () -> str
+                return os.path.join(os.path.dirname(__file__), "ffxiv_structs.yml")
+
+            def create_enum(self, enum):
+                # type: (DefinedEnum) -> None
+                members = []
+                for value in enum.values:
+                    members.append((value, enum.values[value]))
+                enum_type = binaryninja.Type.enumeration(
+                    members=members, width=self.get_size_from_type(enum.underlying)
+                )
+                bv.define_user_type(enum.type, enum_type)
+
+            def create_struct(self, struct):
+                # type: (DefinedStruct) -> None
+                struct_type = binaryninja.Type.structure(
+                    type=binaryninja.StructureVariant.ClassStructureType
+                )
+                bv.define_user_type(struct.type, struct_type)
+
+            def create_struct_members(self, struct):
+                # type: (DefinedStruct) -> None
+                struct_type = bv.types[
+                    struct.type
+                ].mutable_copy()  # type: binaryninja.StructureBuilder
+
+                for field in struct.fields:
+                    field_type = self.get_type(field.type)
+                    if field_type is None:
+                        continue
+
+                    if isinstance(field, DefinedFixedField):
+                        field_type = binaryninja.Type.array(field_type, int(field.size))
+                    struct_type.add_member_at_offset(
+                        field.name,
+                        field_type,
+                        int(field.offset),
+                    )
+
+                bv.define_user_type(struct.type, struct_type)
+
+            def get_func_ea_by_sig(self, pattern):
+                # type: (str) -> int
+                regex = ""
+                for part in pattern.split(" "):
+                    if part == "??":
+                        regex = regex + "."
+                    else:
+                        regex = regex + "\\x" + part
+                compiled = re.compile(regex.encode("utf-8"))
+
+                for segment in bv.segments:
+                    data = bv.read(segment.start, segment.end - segment.start)
+                    match = compiled.search(data)
+                    if match:
+                        match_start = match.start()
+                        addr = segment.start + match_start
+                        if data[match_start] == 0xE8 or data[match_start] == 0xE9:
+                            addr += 5
+                            addr += struct.unpack(
+                                "<I", data[match_start + 1 : match_start + 5]
+                            )[0]
+                        return addr
+
+            def update_member_func(self, member_func, struct):
+                # type: (DefinedMemFunc, DefinedStruct) -> None
+                func_name = "{0}.{1}".format(struct.type, member_func.name)
+
+                func = None
+                symbol = bv.get_symbol_by_raw_name(func_name)
+                if symbol:
+                    func = bv.get_function_at(symbol.address)
+
+                if not func:
+                    func_addr = self.get_func_ea_by_sig(member_func.signature)
+                    if func_addr is not None:
+                        func = bv.get_function_at(func_addr)
+
+                if not func:
+                    return
+
+                if member_func.return_type != "void":
+                    new_return_type = self.get_type(member_func.return_type)
+                    if new_return_type is not None:
+                        func.return_type = new_return_type
+
+                for i, param in enumerate(member_func.parameters):
+                    if i < len(func.parameter_vars):
+                        param_var = func.parameter_vars[i]
+                        if param_var is None:
+                            continue
+
+                        new_param_type = self.get_type(param.type)
+                        if new_param_type is not None:
+                            param_var.type = new_param_type
+                        param_var.name = param.name
+
+            def update_virt_func(self, virt_func, struct):
+                # type: (DefinedVFunc, DefinedStruct) -> None
+                func_name = "{0}.{1}".format(struct.type, virt_func.name)
+
+                func = None
+                symbol = bv.get_symbol_by_raw_name(func_name)
+                if symbol:
+                    func = bv.get_function_at(symbol.address)
+
+                if not func:
+                    return
+
+                if virt_func.return_type != "void":
+                    new_return_type = self.get_type(virt_func.return_type)
+                    if new_return_type is not None:
+                        func.return_type = new_return_type
+
+                for i, param in enumerate(virt_func.parameters):
+                    if i < len(func.parameter_vars):
+                        param_var = func.parameter_vars[i]
+                        if param_var is None:
+                            continue
+
+                        new_param_type = self.get_type(param.type)
+                        if new_param_type is not None:
+                            param_var.type = new_param_type
+                        param_var.name = param.name
+
+            def should_update_member_func(self):
+                # type: () -> bool
+                return (
+                    binaryninja.get_choice_input(
+                        "Update member function types?",
+                        "ffxiv_structimporter",
+                        ["Yes", "No"],
+                    )
+                    == 0
+                )
+
+            def should_update_virt_func(self):
+                # type: () -> bool
+                return (
+                    binaryninja.get_choice_input(
+                        "Update virtual function types?",
+                        "ffxiv_structimporter",
+                        ["Yes", "No"],
+                    )
+                    == 0
+                )
+
+        api = BinjaApi()
 
 
 if api is None:
-    raise Exception("Unable to load IDA or Ghidra")
+    raise Exception("Unable to load API (supported: IDA, Ghidra, Binary Ninja)")
 
 start_time = time()
 
@@ -1258,16 +1548,27 @@ def run():
     for struct in yaml.structs:
         api.create_union(struct)
 
-    if not api.should_update_member_func():
-        return
+    if api.should_update_virt_func():
+        for struct in yaml.structs:
+            if struct.virtual_functions != []:
+                print(
+                    "{0} Updating virtual functions for {1}".format(
+                        get_time(), struct.type
+                    )
+                )
+                for virt_func in struct.virtual_functions:
+                    api.update_virt_func(virt_func, struct)
 
-    for struct in yaml.structs:
-        if struct.member_functions != []:
-            print(
-                "{0} Updating member functions for {1}".format(get_time(), struct.type)
-            )
-            for member_func in struct.member_functions:
-                api.update_member_func(member_func, struct)
+    if api.should_update_member_func():
+        for struct in yaml.structs:
+            if struct.member_functions != []:
+                print(
+                    "{0} Updating member functions for {1}".format(
+                        get_time(), struct.type
+                    )
+                )
+                for member_func in struct.member_functions:
+                    api.update_member_func(member_func, struct)
 
 
 run()

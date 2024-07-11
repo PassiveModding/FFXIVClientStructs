@@ -8,14 +8,13 @@ public enum AstrologianCard {
     Spear = 4,
     Ewer = 5,
     Spire = 6,
-    Lord = 0x70,
-    Lady = 0x80
+    Lord = 7,
+    Lady = 8
 }
 
-public enum AstrologianSeal {
-    Solar = 1,
-    Lunar = 2,
-    Celestial = 3
+public enum AstrologianDraw : byte {
+    Astral = 0,
+    Umbral = 1
 }
 
 public enum DanceStep : byte {
@@ -79,15 +78,15 @@ public enum AetherFlags : byte {
 
 public enum BeastChakraType : byte {
     None = 0,
-    Coeurl = 1,
-    OpoOpo = 2,
-    Raptor = 3
+    OpoOpo = 1,
+    Raptor = 2,
+    Coeurl = 3
 }
 
 [Flags]
 public enum NadiFlags : byte {
-    Lunar = 2,
-    Solar = 4
+    Lunar = 1,
+    Solar = 2
 }
 
 [Flags]

@@ -23,19 +23,18 @@ public struct ScholarGauge {
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 0x10)]
-public unsafe struct AstrologianGauge {
-    [FieldOffset(0x08)] public short Timer;
-    [FieldOffset(0x0D)] public byte Card;
-    [FieldOffset(0x0E)] public byte Seals; // 6 bits, 0,1-3,1-3,1-3 depending on astrosign
+public struct AstrologianGauge {
+    [FieldOffset(0x08)] public short Cards;
+    [FieldOffset(0x0A)] public AstrologianDraw CurrentDraw;
 
-    public AstrologianCard CurrentCard => (AstrologianCard)Card;
-
-    public AstrologianSeal[] CurrentSeals => new[]
+    public AstrologianCard[] CurrentCards => new[]
     {
-        (AstrologianSeal)(3 & (this.Seals >> 0)),
-        (AstrologianSeal)(3 & (this.Seals >> 2)),
-        (AstrologianSeal)(3 & (this.Seals >> 4)),
+        (AstrologianCard)(0xF & (this.Cards >> 0)),
+        (AstrologianCard)(0xF & (this.Cards >> 4)),
+        (AstrologianCard)(0xF & (this.Cards >> 8)),
     };
+
+    public AstrologianCard CurrentArcana => (AstrologianCard)(0xF & (this.Cards >> 12));
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 0x10)]
@@ -65,6 +64,7 @@ public struct BlackMageGauge {
     public int AstralStacks => ElementStance <= 0 ? 0 : ElementStance;
     public bool EnochianActive => EnochianFlags.HasFlag(EnochianFlags.Enochian);
     public bool ParadoxActive => EnochianFlags.HasFlag(EnochianFlags.Paradox);
+    public int AstralSoulStacks => ((int)EnochianFlags >> 2) & 7;
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 0x10)]
@@ -139,20 +139,18 @@ public unsafe partial struct DancerGauge {
 [StructLayout(LayoutKind.Explicit, Size = 0x10)]
 public struct MonkGauge {
     [FieldOffset(0x08)] public byte Chakra; // Chakra count
-
-    [FieldOffset(0x09)]
-    public BeastChakraType BeastChakra1; // CoeurlChakra = 1, RaptorChakra = 2, OpoopoChakra = 3 (only one value)
-
-    [FieldOffset(0x0A)]
-    public BeastChakraType BeastChakra2; // CoeurlChakra = 1, RaptorChakra = 2, OpoopoChakra = 3 (only one value)
-
-    [FieldOffset(0x0B)]
-    public BeastChakraType BeastChakra3; // CoeurlChakra = 1, RaptorChakra = 2, OpoopoChakra = 3 (only one value)
-
-    [FieldOffset(0x0C)] public NadiFlags Nadi; // LunarNadi = 2, SolarNadi = 4 (If both then 2+4=6)
+    [FieldOffset(0x09)] public BeastChakraType BeastChakra1; // OpoOpoChakra = 1, RaptorChakra = 2, CoeurlChakra = 3 (only one value)
+    [FieldOffset(0x0A)] public BeastChakraType BeastChakra2; // OpoOpoChakra = 1, RaptorChakra = 2, CoeurlChakra = 3 (only one value)
+    [FieldOffset(0x0B)] public BeastChakraType BeastChakra3; // OpoOpoChakra = 1, RaptorChakra = 2, CoeurlChakra = 3 (only one value)
+    [FieldOffset(0x0C)] public byte BeastChakraStacks;
+    [FieldOffset(0x0D)] public NadiFlags Nadi; // LunarNadi = 1, SolarNadi = 2, Both = 3
     [FieldOffset(0x0E)] public ushort BlitzTimeRemaining; // 20 seconds
 
-    public BeastChakraType[] BeastChakra => new[] { BeastChakra1, BeastChakra2, BeastChakra3 };
+    public BeastChakraType[] BeastChakra => [BeastChakra1, BeastChakra2, BeastChakra3];
+
+    public int OpoOpoStacks => BeastChakraStacks & 3;
+    public int RaptorStacks => ((BeastChakraStacks >> 2) & 3);
+    public int CoeurlStacks => ((BeastChakraStacks >> 4) & 3);
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 0x10)]
