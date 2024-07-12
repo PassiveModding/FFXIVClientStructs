@@ -25,4 +25,6 @@ public unsafe partial struct Skeleton {
     [FieldOffset(0x68)] public PartialSkeleton* PartialSkeletons;
 
     [FieldOffset(0xB8)] public CharacterBase* Owner;
+    
+    public Span<Pointer<SkeletonResourceHandle>> SkeletonResourceHandlesSpan => new(SkeletonResourceHandles, PartialSkeletonCount);
 }
