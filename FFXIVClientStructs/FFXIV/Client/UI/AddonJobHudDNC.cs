@@ -20,12 +20,14 @@ public unsafe partial struct AddonJobHudDNC0 {
     [Inherits<AddonJobHudGaugeData>]
     [StructLayout(LayoutKind.Explicit, Size = 0x30)]
     public partial struct StepGaugeData {
-        [FieldOffset(0x08), FixedSizeArray] internal FixedSizeArray2<byte> _prerequisites;
+        [FieldOffset(0x08)] public bool Enabled;
+        [FieldOffset(0x09)] public bool Dancing;
         [FieldOffset(0x0C)] public int DanceStatus;
         [FieldOffset(0x10)] public int CompletedSteps;
         [FieldOffset(0x14), FixedSizeArray] internal FixedSizeArray4<int> _steps;
         [FieldOffset(0x24)] public int StandardFinishActive;
         [FieldOffset(0x28)] public int StandardFinishTimeLeft;
+        [FieldOffset(0x2C)] public bool FinishEffect;
     }
 
     [GenerateInterop]
@@ -78,7 +80,8 @@ public unsafe partial struct AddonJobHudDNC1 {
     [Inherits<AddonJobHudGaugeData>]
     [StructLayout(LayoutKind.Explicit, Size = 0x20)]
     public partial struct FeatherGaugeData {
-        [FieldOffset(0x08), FixedSizeArray] internal FixedSizeArray2<byte> _prerequisites;
+        [FieldOffset(0x08)] public bool Enabled;
+        [FieldOffset(0x09)] public bool EspritEnabled;
         [FieldOffset(0x0C)] public int FeatherCount;
         [FieldOffset(0x10)] public int EspritValue;
         [FieldOffset(0x14)] public int EspritMax;

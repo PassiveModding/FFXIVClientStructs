@@ -19,7 +19,8 @@ public unsafe partial struct AtkTextNode : ICreatable {
     [FieldOffset(0xB4)] public ByteColor TextColor;
     [FieldOffset(0xB8)] public ByteColor EdgeColor;
     [FieldOffset(0xBC)] public ByteColor BackgroundColor;
-    [FieldOffset(0xC0)] public Utf8String NodeText;
+    [FieldOffset(0xC0)] public Utf8String NodeText; // stores a copy of OriginalTextPointer
+    [FieldOffset(0x128)] public byte* OriginalTextPointer; // set to the original argument of SetText even though the string is copied to the node
 
     [FieldOffset(0x130)] public void* UnkPtr_1;
 
@@ -45,8 +46,19 @@ public unsafe partial struct AtkTextNode : ICreatable {
         NodeText.Ctor();
     }
 
-    [MemberFunction("E8 ?? ?? ?? ?? 8D 4E 32"), GenerateStringOverloads]
+    /// <summary>
+    /// Set the text of the node.
+    /// The game assumes the pointer passed to this function will stay alive. See <see href="https://github.com/aers/FFXIVClientStructs/issues/1040">here</see> for more information.
+    /// </summary>
+    /// <param name="str">Null-terminated UTF-8 string buffer to set the text to.</param>
+    [MemberFunction("E8 ?? ?? ?? ?? 8D 4E 32")]
     public partial void SetText(byte* str);
+
+    [Obsolete("This function is unsafe. See https://github.com/aers/FFXIVClientStructs/issues/1040 for more details.", true)]
+    public void SetText(string str) => throw new InvalidOperationException("This function is unsafe. See https://github.com/aers/FFXIVClientStructs/issues/1040 for more details.");
+
+    [Obsolete("This function is unsafe. See https://github.com/aers/FFXIVClientStructs/issues/1040 for more details.", true)]
+    public void SetText(ReadOnlySpan<byte> str) => throw new InvalidOperationException("This function is unsafe. See https://github.com/aers/FFXIVClientStructs/issues/1040 for more details.");
 
     [MemberFunction("E8 ?? ?? ?? ?? 4A 8B 9C F6 ?? ?? ?? ??")]
     public partial byte* GetText();
