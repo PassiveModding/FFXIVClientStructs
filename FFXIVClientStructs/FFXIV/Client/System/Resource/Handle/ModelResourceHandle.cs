@@ -8,7 +8,7 @@ namespace FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 [GenerateInterop]
 [Inherits<ResourceHandle>]
 [StructLayout(LayoutKind.Explicit, Size = 0x260)]
-public unsafe partial struct ModelResourceHandle {
+public partial struct ModelResourceHandle {
     [FieldOffset(0x208)] public StdMap<Pointer<byte>, short> Attributes;
     [FieldOffset(0x228)] public StdMap<Pointer<byte>, short> Shapes;
 
@@ -20,6 +20,4 @@ public unsafe partial struct ModelResourceHandle {
 
     public string GetMaterialFileNameBySlotAsString(uint slot)
         => Encoding.UTF8.GetString(GetMaterialFileNameBySlotAsSpan(slot));
-    
-   
 }
