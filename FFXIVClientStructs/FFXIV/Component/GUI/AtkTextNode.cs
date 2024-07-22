@@ -1,3 +1,4 @@
+using System.Text;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using FFXIVClientStructs.FFXIV.Client.System.String;
@@ -54,11 +55,23 @@ public unsafe partial struct AtkTextNode : ICreatable {
     [MemberFunction("E8 ?? ?? ?? ?? 8D 4E 32")]
     public partial void SetText(byte* str);
 
-    [Obsolete("This function is unsafe. See https://github.com/aers/FFXIVClientStructs/issues/1040 for more details.", true)]
-    public void SetText(string str) => throw new InvalidOperationException("This function is unsafe. See https://github.com/aers/FFXIVClientStructs/issues/1040 for more details.");
+    public void SetText(string str) {
+        int strUtf8Len = Encoding.UTF8.GetByteCount(str);
+        Span<byte> strBytes = strUtf8Len <= 512 ? stackalloc byte[strUtf8Len + 1] : new byte[strUtf8Len + 1];
+        Encoding.UTF8.GetBytes(str, strBytes);
+        strBytes[strUtf8Len] = 0;
+        fixed (byte* strPtr = strBytes) {
+            SetText(strPtr);
+        }
+        OriginalTextPointer = NodeText.StringPtr;
+    }
 
-    [Obsolete("This function is unsafe. See https://github.com/aers/FFXIVClientStructs/issues/1040 for more details.", true)]
-    public void SetText(ReadOnlySpan<byte> str) => throw new InvalidOperationException("This function is unsafe. See https://github.com/aers/FFXIVClientStructs/issues/1040 for more details.");
+    public void SetText(ReadOnlySpan<byte> str) {
+        fixed (byte* strPtr = str) {
+            SetText(strPtr);
+        }
+        OriginalTextPointer = NodeText.StringPtr;
+    }
 
     [MemberFunction("E8 ?? ?? ?? ?? 4A 8B 9C F6 ?? ?? ?? ??")]
     public partial byte* GetText();
