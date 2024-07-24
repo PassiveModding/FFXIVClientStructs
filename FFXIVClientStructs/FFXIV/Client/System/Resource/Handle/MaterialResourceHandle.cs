@@ -1,7 +1,6 @@
 using System.Text;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Render;
-using FFXIVClientStructs.FFXIV.Common.Math;
 
 namespace FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 
@@ -13,7 +12,7 @@ namespace FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 [Inherits<ResourceHandle>]
 [StructLayout(LayoutKind.Explicit, Size = 0x108)]
 public unsafe partial struct MaterialResourceHandle {
-    public const int TableRows = 32;
+    public const int TableRows = 16;
 
     [StructLayout(LayoutKind.Explicit, Size = 0x10)]
     public struct TextureEntry {
@@ -56,88 +55,40 @@ public unsafe partial struct MaterialResourceHandle {
     /// <remarks>
     /// All RGB values in this structure are pre-squared.
     /// </remarks>
-    //[StructLayout(LayoutKind.Explicit, Size = 0x20)]
-    [StructLayout(LayoutKind.Explicit, Size = 0x40)]
+    [StructLayout(LayoutKind.Explicit, Size = 0x20)]
     public struct ColorTableRow {
-        [FieldOffset(0x0)] public ushort DiffuseRed;
-        [FieldOffset(0x2)] public ushort DiffuseGreen;
-        [FieldOffset(0x4)] public ushort DiffuseBlue;
-        [FieldOffset(0x6)] public ushort _specularStrength;
-        [FieldOffset(0x8)] public ushort SpecularRed;
-        [FieldOffset(0xA)] public ushort SpecularGreen;
-        [FieldOffset(0xC)] public ushort SpecularBlue;
-        [FieldOffset(0xE)] public ushort _glossStrength;
-        [FieldOffset(0x10)] public ushort EmissiveRed;
-        [FieldOffset(0x12)] public ushort EmissiveGreen;
-        [FieldOffset(0x14)] public ushort EmissiveBlue;
-        [FieldOffset(0x16)] public ushort TileIndexW;
-        [FieldOffset(0x18)] public ushort MaterialRepeatX;
-        [FieldOffset(0x1A)] public ushort MaterialSkewX;
-        [FieldOffset(0x1C)] public ushort MaterialSkewY;
-        [FieldOffset(0x1E)] public ushort MaterialRepeatY;
-        
-        private static float ToFloat(ushort value)
-            => (float)BitConverter.UInt16BitsToHalf(value);
-        
-        private static ushort FromFloat(float value)
-            => BitConverter.HalfToUInt16Bits((Half)value);
-        
-        public Vector3 Diffuse {
-            get => new(ToFloat(DiffuseRed), ToFloat(DiffuseGreen), ToFloat(DiffuseBlue));
-            set {
-                DiffuseRed = FromFloat(value.X);
-                DiffuseGreen = FromFloat(value.Y);
-                DiffuseBlue = FromFloat(value.Z);
-            }
-        }
-        
-        public Vector3 Specular {
-            get => new(ToFloat(SpecularRed), ToFloat(SpecularGreen), ToFloat(SpecularBlue));
-            set {
-                SpecularRed = FromFloat(value.X);
-                SpecularGreen = FromFloat(value.Y);
-                SpecularBlue = FromFloat(value.Z);
-            }
-        }
-        
-        public Vector3 Emissive {
-            get => new(ToFloat(EmissiveRed), ToFloat(EmissiveGreen), ToFloat(EmissiveBlue));
-            set {
-                EmissiveRed = FromFloat(value.X);
-                EmissiveGreen = FromFloat(value.Y);
-                EmissiveBlue = FromFloat(value.Z);
-            }
-        }
-        
-        public Vector2 MaterialRepeat {
-            get => new(ToFloat(MaterialRepeatX), ToFloat(MaterialRepeatY));
-            set {
-                MaterialRepeatX = FromFloat(value.X);
-                MaterialRepeatY = FromFloat(value.Y);
-            }
-        }
-        
-        public Vector2 MaterialSkew {
-            get => new(ToFloat(MaterialSkewX), ToFloat(MaterialSkewY));
-            set {
-                MaterialSkewX = FromFloat(value.X);
-                MaterialSkewY = FromFloat(value.Y);
-            }
-        }
-        
-        public float SpecularStrength {
-            get => ToFloat(_specularStrength);
-            set => _specularStrength = FromFloat(value);
-        }
-        
-        public float GlossStrength {
-            get => ToFloat(_glossStrength);
-            set => _glossStrength = FromFloat(value);
-        }
-        
+        [FieldOffset(0x0)] public Half DiffuseRed;
+        [FieldOffset(0x2)] public Half DiffuseGreen;
+        [FieldOffset(0x4)] public Half DiffuseBlue;
+        [FieldOffset(0x6)] public Half SpecularStrength;
+        [FieldOffset(0x8)] public Half SpecularRed;
+        [FieldOffset(0xA)] public Half SpecularGreen;
+        [FieldOffset(0xC)] public Half SpecularBlue;
+        [FieldOffset(0xE)] public Half GlossStrength;
+        [FieldOffset(0x10)] public Half EmissiveRed;
+        [FieldOffset(0x12)] public Half EmissiveGreen;
+        [FieldOffset(0x14)] public Half EmissiveBlue;
+        [FieldOffset(0x16)] public Half TileIndexW;
+        [FieldOffset(0x18)] public Half TileScaleUU;
+        [FieldOffset(0x1A)] public Half TileScaleUV;
+        [FieldOffset(0x1C)] public Half TileScaleVU;
+        [FieldOffset(0x1E)] public Half TileScaleVV;
+
         public ushort TileIndex {
-            get => (ushort)(ToFloat(TileIndexW) * 64.0f);
-            set => TileIndexW = FromFloat((value + 0.5f) / 64.0f);
+            get => (ushort)((float)TileIndexW * 64.0f);
+            set => TileIndexW = (Half)((value + 0.5f) / 64.0f);
+        }
+
+        public Span<Half> AsSpan() {
+            fixed (Half* ptr = &DiffuseRed) {
+                return new(ptr, 16);
+            }
+        }
+
+        public ReadOnlySpan<Half> AsReadOnlySpan() {
+            fixed (Half* ptr = &DiffuseRed) {
+                return new(ptr, 16);
+            }
         }
     }
 
