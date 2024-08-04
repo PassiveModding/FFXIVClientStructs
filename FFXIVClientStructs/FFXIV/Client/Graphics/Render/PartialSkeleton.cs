@@ -8,6 +8,7 @@ namespace FFXIVClientStructs.FFXIV.Client.Graphics.Render;
 [GenerateInterop]
 [StructLayout(LayoutKind.Explicit, Size = 0x220)]
 public unsafe partial struct PartialSkeleton {
+    [FieldOffset(0x8)] public uint Flags;
     [FieldOffset(0x20), FixedSizeArray] internal FixedSizeArray2<hkaSampleBlendJob> _jobs;
     [FieldOffset(0x120)] public short ConnectedParentBoneIndex;
     [FieldOffset(0x122)] public short ConnectedBoneIndex;
@@ -27,4 +28,6 @@ public unsafe partial struct PartialSkeleton {
         if (index is < 0 or > 3) throw new ArgumentOutOfRangeException(nameof(index));
         return (hkaPose*)HavokPoses[index];
     }
+    
+    public uint BoneCount => (Flags >> 5) & 0xFFFu;
 }
