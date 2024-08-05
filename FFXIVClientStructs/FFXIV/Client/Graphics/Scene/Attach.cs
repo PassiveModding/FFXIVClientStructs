@@ -37,10 +37,7 @@ public unsafe partial struct Attach {
 
     [StructLayout(LayoutKind.Explicit, Size = 0x58)]
     public struct Attachment {
-        [FieldOffset(0x02)] public ushort SkeletonIdxBoneIdx;
+        [FieldOffset(0x02)] public Skeleton.BoneIndexMask BoneIndexMask;
         [FieldOffset(0x10)] public hkQsTransformf ChildTransform;
-
-        public readonly byte SkeletonIdx => (byte)((SkeletonIdxBoneIdx >> 12) & 0xF);
-        public readonly ushort BoneIdx => (ushort)(SkeletonIdxBoneIdx & 0xFFF);
     }
 }
