@@ -30,7 +30,7 @@ public unsafe partial struct hkaPose {
     [FieldOffset(0x39)] public byte LocalInSync;
     [FieldOffset(0x40)] public hkArray<float> FloatSlotValues;
 
-    [MemberFunction("40 53 48 83 EC 20 4C 89 01")]
+    [MemberFunction("40 53 48 83 EC 20 4C 89 01 33 C0")]
     public partial void Ctor1(PoseSpace space, hkaSkeleton* skeleton, hkArray<hkQsTransformf>* pose);
 
     [MemberFunction("40 53 48 83 EC 30 4C 89 01")]
@@ -39,10 +39,10 @@ public unsafe partial struct hkaPose {
     // [MemberFunction("")]
     // public partial hkaSkeleton* GetSkeleton();
 
-    [MemberFunction("E8 ?? ?? ?? ?? 45 33 C0 4C 8B D0")]
+    [MemberFunction("E8 ?? ?? ?? ?? 48 8B 4C 24 ?? 48 8B D0 E8 ?? ?? ?? ?? 48 83 C4 20")]
     public partial hkArray<hkQsTransformf>* GetSyncedPoseLocalSpace();
 
-    [MemberFunction("E8 ?? ?? ?? ?? 4B 8D 1C 7F")]
+    [MemberFunction("40 53 48 83 EC 20 48 8B D9 E8 ?? ?? ?? ?? 48 8D 43 18")]
     public partial hkArray<hkQsTransformf>* GetSyncedPoseModelSpace();
 
     // [MemberFunction("")]
@@ -51,7 +51,7 @@ public unsafe partial struct hkaPose {
     [MemberFunction("48 8B 01 4C 8B C1 4C 63 48 30 48 8B 02 48 8B 51 08")]
     public partial void SetPoseLocalSpace(hkArray<hkQsTransformf>* poseLocal);
 
-    [MemberFunction("E8 ?? ?? ?? ?? 48 8B 06 48 8D 5E 40")]
+    [MemberFunction("48 8B 01 4C 8B C1 4C 63 48 30 48 8B 02 48 8B 51 18")]
     public partial void SetPoseModelSpace(hkArray<hkQsTransformf>* poseModel);
 
     // [MemberFunction("")]
@@ -75,25 +75,25 @@ public unsafe partial struct hkaPose {
     // [MemberFunction("")]
     // public partial void SetFloatSlotValue(int floatSlotIdx, float value);
 
-    [MemberFunction("E8 ?? ?? ?? ?? 48 8B CF 48 83 C4 58")]
+    [MemberFunction("4C 8B DC 53 48 81 EC ?? ?? ?? ?? 80 79 39 00")]
     public partial void SyncLocalSpace();
 
     [MemberFunction("48 83 EC 18 80 79 38 00")]
     public partial void SyncModelSpace();
 
-    [MemberFunction("E8 ?? ?? ?? ?? 8B 4C 3B 04")]
+    [MemberFunction("4C 8B DC 53 55 56 57 41 54 41 56 48 81 EC")]
     public partial hkQsTransformf* AccessBoneLocalSpace(int boneIdx);
 
-    [MemberFunction("E8 ?? ?? ?? ?? 0F 10 47 10")]
+    [MemberFunction("48 8B C4 89 50 10 53 57")]
     public partial hkQsTransformf* AccessBoneModelSpace(int boneIdx, PropagateOrNot propagateOrNot);
 
-    [MemberFunction("E8 ?? ?? ?? ?? 8B 57 08 4C 8B E0")]
+    [MemberFunction("E8 ?? ?? ?? ?? 4D 8B 4E 40")]
     public partial hkArray<hkQsTransformf>* AccessSyncedPoseLocalSpace();
 
     [MemberFunction("E8 ?? ?? ?? ?? 49 8B 8D ?? ?? ?? ?? 8B 58 08")]
     public partial hkArray<hkQsTransformf>* AccessSyncedPoseModelSpace();
 
-    [MemberFunction("E8 ?? ?? ?? ?? 41 0F 2F F6")]
+    [MemberFunction("E8 ?? ?? ?? ?? EB 05 E8 ?? ?? ?? ?? 4D 8B 4E 40")]
     public partial hkArray<hkQsTransformf>* AccessUnsyncedPoseLocalSpace();
 
     // [MemberFunction("")]
