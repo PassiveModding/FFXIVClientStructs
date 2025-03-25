@@ -63,14 +63,16 @@ public unsafe struct ShaderPackage {
     [FieldOffset(0xB8)] public ConstantSamplerUnknown* Unknowns2;
 
     // again these are all CRC32s
-    [FieldOffset(0xC0)] public uint* SystemKeys;
+    // [FieldOffset(0xC0)] public uint* SystemKeys; <- 
     [FieldOffset(0xC8)] public uint* SceneKeys;
-    [FieldOffset(0xD0)] public uint* MaterialKeys;
-    [FieldOffset(0xD8)] public uint* SystemValues;
+    // [FieldOffset(0xD0)] public uint* MaterialKeys; <- previously MaterialKeys, now points to SceneKeys?
+    [FieldOffset(0xD8)] public uint* MaterialKeys;
+    // [FieldOffset(0xD8)] public uint* SystemValues;
     [FieldOffset(0xE0)] public uint* SceneValues;
-    [FieldOffset(0xE8)] public uint* MaterialValues;
-    [FieldOffset(0xF0)] public uint SubviewValue1;
-    [FieldOffset(0xF4)] public uint SubviewValue2;
+    // [FieldOffset(0xE8)] public uint* MaterialValues; <- previously MaterialValues, now points to SceneValues?
+    [FieldOffset(0xF0)] public uint* MaterialValues;
+    [FieldOffset(0xF8)] public uint SubviewValue1;
+    [FieldOffset(0xFC)] public uint SubviewValue2;
 
     public Span<MaterialElement> MaterialElementsSpan
         => new(MaterialElements, MaterialElementCount);
@@ -82,14 +84,14 @@ public unsafe struct ShaderPackage {
     public Span<ConstantSamplerUnknown> UnknownsSpan
         => new(Unknowns, UnkCount);
 
-    public Span<uint> SystemKeysSpan
-        => new(SystemKeys, SystemKeyCount);
+    // public Span<uint> SystemKeysSpan
+    //     => new(SystemKeys, SystemKeyCount);
     public Span<uint> SceneKeysSpan
         => new(SceneKeys, SceneKeyCount);
     public Span<uint> MaterialKeysSpan
         => new(MaterialKeys, MaterialKeyCount);
-    public Span<uint> SystemValuesSpan
-        => new(SystemValues, SystemKeyCount);
+    // public Span<uint> SystemValuesSpan
+    //     => new(SystemValues, SystemKeyCount);
     public Span<uint> SceneValuesSpan
         => new(SceneValues, SceneKeyCount);
     public Span<uint> MaterialValuesSpan

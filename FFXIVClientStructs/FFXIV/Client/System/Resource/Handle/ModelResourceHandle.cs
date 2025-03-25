@@ -8,7 +8,9 @@ namespace FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 [GenerateInterop]
 [Inherits<ResourceHandle>]
 [StructLayout(LayoutKind.Explicit, Size = 0x280)]
-public partial struct ModelResourceHandle {
+public unsafe partial struct ModelResourceHandle {
+    [FieldOffset(0xC8)] public byte* StringTable;
+    [FieldOffset(0x208)] public MaterialResourceHandle** MaterialResourceHandles;
     [FieldOffset(0x228)] public StdMap<CStringPointer, short> Attributes;
     [FieldOffset(0x248)] public StdMap<CStringPointer, short> Shapes;
 

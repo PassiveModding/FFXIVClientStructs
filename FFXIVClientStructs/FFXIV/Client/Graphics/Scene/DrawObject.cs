@@ -9,6 +9,7 @@ namespace FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 [StructLayout(LayoutKind.Explicit, Size = 0x90)]
 public unsafe partial struct DrawObject {
     [FieldOffset(0x88)] public byte Flags;
+    [FieldOffset(0x89)] public byte DrawObjectFlags2; // indicates model relations?
 
     public bool IsCoveredFromRain {
         get => (Flags & 0x10) == 0x10;
